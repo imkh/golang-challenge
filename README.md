@@ -114,7 +114,7 @@ func main() {
 
 ## CLI application
 
-This `cmd/mfx-recruit-dev` directory contains source code for a simple CLI application that makes use of the library.
+The `cmd/mfx-recruit-dev` directory contains source code for a simple CLI application that makes use of the library.
 
 ### Build
 
