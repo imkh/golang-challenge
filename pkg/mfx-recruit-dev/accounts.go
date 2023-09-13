@@ -21,9 +21,9 @@ type Account struct {
 
 // GetAccount gets a single account.
 func (s *AccountsService) GetAccount(id int) (*Account, *http.Response, error) {
-	u := fmt.Sprintf("accounts/%d", id)
+	path := fmt.Sprintf("accounts/%d", id)
 
-	req, err := s.client.NewRequest(http.MethodGet, u, nil)
+	req, err := s.client.NewRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -38,10 +38,10 @@ func (s *AccountsService) GetAccount(id int) (*Account, *http.Response, error) {
 }
 
 // ListUserAccounts gets a list of accounts for the given user.
-func (s *AccountsService) ListUserAccounts(userId int) ([]*Account, *http.Response, error) {
-	u := fmt.Sprintf("users/%d/accounts", userId)
+func (s *AccountsService) ListUserAccounts(userID int) ([]*Account, *http.Response, error) {
+	path := fmt.Sprintf("users/%d/accounts", userID)
 
-	req, err := s.client.NewRequest(http.MethodGet, u, nil)
+	req, err := s.client.NewRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -20,7 +20,9 @@ type User struct {
 
 // ListUsers gets a list of users.
 func (s *UsersService) ListUsers() ([]*User, *http.Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, "users", nil)
+	path := "users"
+
+	req, err := s.client.NewRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -36,9 +38,9 @@ func (s *UsersService) ListUsers() ([]*User, *http.Response, error) {
 
 // GetUser gets a single user.
 func (s *UsersService) GetUser(id int) (*User, *http.Response, error) {
-	u := fmt.Sprintf("users/%d", id)
+	path := fmt.Sprintf("users/%d", id)
 
-	req, err := s.client.NewRequest(http.MethodGet, u, nil)
+	req, err := s.client.NewRequest(http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
