@@ -5,8 +5,11 @@ import (
 	"os"
 	"strconv"
 
-	mfxrecruitdev "example.com/go-mfx-recruit-dev"
 	"github.com/olekukonko/tablewriter"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+
+	mfxrecruitdev "example.com/go-mfx-recruit-dev"
 )
 
 const (
@@ -18,12 +21,15 @@ func printTable(user *mfxrecruitdev.User, accounts []*mfxrecruitdev.Account) {
 	table.SetHeader([]string{"ID", "Account Name", "Balance"})
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
+	// Used for printing localized human-readable account balances (¥120000 -> ¥120,000)
+	printer := message.NewPrinter(language.English)
+
 	var totalBalance int
 	for _, account := range accounts {
 		rows := []string{
 			strconv.Itoa(account.ID),
 			account.Name,
-			fmt.Sprintf("¥%d", account.Balance),
+			printer.Sprintf("¥%d", account.Balance),
 		}
 
 		var color tablewriter.Colors
@@ -42,7 +48,7 @@ func printTable(user *mfxrecruitdev.User, accounts []*mfxrecruitdev.Account) {
 		table.SetFooter([]string{
 			"",
 			"TOTAL",
-			fmt.Sprintf("¥%d", totalBalance),
+			printer.Sprintf("¥%d", totalBalance),
 		})
 		if totalBalance < LOW_BALANCE {
 			table.SetFooterColor(
