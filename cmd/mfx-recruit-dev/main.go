@@ -1,65 +1,99 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"log"
+	"os"
+
+	"github.com/urfave/cli/v2"
 
 	mfxrecruitdev "example.com/go-mfx-recruit-dev"
 )
 
-func prettyPrint(i interface{}) {
-	buffer := &bytes.Buffer{}
-	encoder := json.NewEncoder(buffer)
-	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", "\t")
-	encoder.Encode(i)
-	fmt.Println(buffer)
-}
-
 func main() {
 	client, err := mfxrecruitdev.NewClient()
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to create MFX Recruit Dev client: %v", err)
+		os.Exit(1)
 	}
 
-	// List users
-	fmt.Println("### List users")
-	users, _, err := client.Users.ListUsers()
-	if err != nil {
-		log.Fatal(err)
-	}
-	prettyPrint(users)
+	app := &cli.App{
+		Name:    "mfx-recruit-dev",
+		Usage:   "A command-line tool for accessing the MFX Recruit Dev API",
+		Version: "v1.0.0",
+		Commands: []*cli.Command{
+			{
+				Name:    "user",
+				Aliases: []string{"u"},
+				Usage:   "get a user and its accounts",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:     "id",
+						Usage:    "ID of the user",
+						Required: true,
+					},
+					&cli.BoolFlag{
+						Name:  "json",
+						Usage: "Print JSON output",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					userID := cCtx.Int("id")
+					user, _, err := client.Users.GetUser(userID)
+					if err != nil {
+						return fmt.Errorf("failed to get user %d: %v", userID, err)
+					}
+					userAccounts, _, err := client.Accounts.ListUserAccounts(userID)
+					if err != nil {
+						return fmt.Errorf("failed to get user %d's accounts: %v", userID, err)
+					}
 
-	// Get user
-	fmt.Println("### Get user 1")
-	user, _, err := client.Users.GetUser(1)
-	if err != nil {
-		log.Fatal(err)
-	}
-	prettyPrint(user)
+					if cCtx.Bool("json") {
+						printUserJSON(user, userAccounts)
+					} else {
+						printTable(user, userAccounts)
+					}
+					return nil
+				},
+			},
+			{
+				Name:    "account",
+				Aliases: []string{"a"},
+				Usage:   "get an account",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:     "id",
+						Usage:    "ID of the account",
+						Required: true,
+					},
+					&cli.BoolFlag{
+						Name:  "json",
+						Usage: "Print JSON output",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					accountID := cCtx.Int("id")
+					account, _, err := client.Accounts.GetAccount(accountID)
+					if err != nil {
+						return fmt.Errorf("failed to get account %d: %v", accountID, err)
+					}
+					user, _, err := client.Users.GetUser(account.UserID)
+					if err != nil {
+						return fmt.Errorf("failed to get user %d: %v", account.UserID, err)
+					}
 
-	// List user 1's accounts
-	fmt.Println("### List user 1's accounts")
-	userAccounts, _, err := client.Accounts.ListUserAccounts(1)
-	if err != nil {
-		log.Fatal(err)
+					if cCtx.Bool("json") {
+						printAccountJSON(account, user)
+					} else {
+						printTable(user, []*mfxrecruitdev.Account{account})
+					}
+					return nil
+				},
+			},
+		},
 	}
-	prettyPrint(userAccounts)
 
-	// Get account
-	fmt.Println("### Get account 2")
-	account, _, err := client.Accounts.GetAccount(2)
-	if err != nil {
-		log.Fatal(err)
-	}
-	prettyPrint(account)
-
-	// User Not Found
-	fmt.Println("### User Not Found")
-	_, _, err = client.Users.GetUser(10)
-	if err != nil {
-		fmt.Println(err)
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintf(os.Stderr, "%v", err)
+		os.Exit(1)
 	}
 }
