@@ -6,13 +6,10 @@ import (
 	"fmt"
 	"log"
 
-	mfxrecruitdev "github.com/imkh/money-forward-challenge/pkg/mfx-recruit-dev"
+	mfxrecruitdev "example.com/go-mfx-recruit-dev"
 )
 
 func prettyPrint(i interface{}) {
-	// s, _ := json.MarshalIndent(i, "", "\t")
-	// fmt.Println(string(s))
-
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(false)

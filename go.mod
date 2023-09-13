@@ -1,4 +1,4 @@
-module github.com/imkh/money-forward-challenge
+module example.com/go-mfx-recruit-dev
 
 go 1.21.0
 
